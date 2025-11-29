@@ -80,7 +80,7 @@ int main( int argc, char** argv )
     # endif
 
     // Exceptions catcher
-    CatchExceptions( "FOnlineServer", SERVER_VERSION );
+    //CatchExceptions( "FOnlineServer", SERVER_VERSION );
 
     // Timer
     Timer::Init();

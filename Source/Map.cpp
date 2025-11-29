@@ -3,6 +3,7 @@
 #include "CritterManager.h"
 #include "ItemManager.h"
 #include "MapManager.h"
+#include <algorithm>
 
 const char* MapEventFuncName[ MAP_EVENT_MAX ] =
 {

@@ -1492,14 +1492,14 @@ bool ProtoMap::LoadCache( FileManager& fm )
     if( count )
     {
         WallsToSend.resize( count );
-        if( !fm.CopyMem( &WallsToSend[ 0 ], count * sizeof( SceneryCl ) ) )
+        if( !fm.CopyMem( WallsToSend.data(), count * sizeof( SceneryCl ) ) )
             return false;
     }
     count = fm.GetBEUInt();
     if( count )
     {
         SceneriesToSend.resize( count );
-        if( !fm.CopyMem( &SceneriesToSend[ 0 ], count * sizeof( SceneryCl ) ) )
+        if( !fm.CopyMem( SceneriesToSend.data(), count * sizeof( SceneryCl ) ) )
             return false;
     }
 
@@ -1550,7 +1550,7 @@ void ProtoMap::SaveCache( FileManager& fm )
     // Tiles
     fm.SetBEUInt( (uint) Tiles.size() );
     if( Tiles.size() )
-        fm.SetData( &Tiles[ 0 ], (uint) Tiles.size() * sizeof( Tile ) );
+        fm.SetData( Tiles.data(), (uint) Tiles.size() * sizeof( Tile ) );
 
     // Critters
     fm.SetBEUInt( (uint) CrittersVec.size() );
@@ -1574,9 +1574,9 @@ void ProtoMap::SaveCache( FileManager& fm )
 
     // To send
     fm.SetBEUInt( (uint) WallsToSend.size() );
-    fm.SetData( &WallsToSend[ 0 ], (uint) WallsToSend.size() * sizeof( SceneryCl ) );
+    fm.SetData( WallsToSend.data(), (uint) WallsToSend.size() * sizeof( SceneryCl ) );
     fm.SetBEUInt( (uint) SceneriesToSend.size() );
-    fm.SetData( &SceneriesToSend[ 0 ], (uint) SceneriesToSend.size() * sizeof( SceneryCl ) );
+    fm.SetData( SceneriesToSend.data(), (uint) SceneriesToSend.size() * sizeof( SceneryCl ) );
 
     // Hashes
     fm.SetBEUInt( HashTiles );
@@ -1588,7 +1588,7 @@ void ProtoMap::SaveCache( FileManager& fm )
 
     // Entires
     fm.SetBEUInt( (uint) mapEntires.size() );
-    fm.SetData( &mapEntires[ 0 ], (uint) mapEntires.size() * sizeof( MapEntire ) );
+    fm.SetData( mapEntires.data(), (uint) mapEntires.size() * sizeof( MapEntire ) );
 
     // Save
     char fname[ MAX_FOPATH ];

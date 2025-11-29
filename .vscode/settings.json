@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "strstream": "cpp",
+        "xstring": "cpp",
+        "vector": "cpp",
+        "*.fos": "cpp"
+    }
+}

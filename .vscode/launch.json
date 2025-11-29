@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Запуск FOnline (Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            // ТЕПЕРЬ УКАЗЫВАЕМ ПУТЬ К EXE В ПАПКЕ ИГРЫ, А НЕ В BUILD
+            "program": "F:/VS/FOnline-412/sdk/Client/FOnlineClient.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "F:/VS/FOnline-412/sdk/Client/",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
+            // --- КОНФИГУРАЦИЯ СЕРВЕРА ---
+            "name": "Запуск FOnline Server (Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            // Путь к EXE сервера в папке SDK (не в build!)
+            "program": "F:/VS/FOnline-412/sdk/Server/FOnlineServer.exe",
+            "args": [], 
+            "stopAtEntry": false,
+            // Рабочая папка сервера (там, где FOnline.cfg и папка data сервера)
+            "cwd": "F:/VS/FOnline-412/sdk/Server/",
+            "environment": [],
+            "console": "externalTerminal"
+        }
+    ]
+}

@@ -27,7 +27,7 @@ int main( int argc, char** argv )
     #endif
 
     // Exception
-    CatchExceptions( "FOnline", CLIENT_VERSION );
+ //   CatchExceptions( "FOnline", CLIENT_VERSION );
 
     // Make command line
     SetCommandLine( argc, argv );

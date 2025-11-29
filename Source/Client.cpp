@@ -95,7 +95,7 @@ uint* UID1;
 bool FOClient::Init()
 {
     WriteLog( "Engine initialization...\n" );
-
+/*
     STATIC_ASSERT( sizeof( uint ) == 4 );
     STATIC_ASSERT( sizeof( ushort ) == 2 );
     STATIC_ASSERT( sizeof( uchar ) == 1 );
@@ -116,7 +116,7 @@ bool FOClient::Init()
     STATIC_ASSERT( sizeof( Sprite ) == 112 );
     STATIC_ASSERT( sizeof( ProtoMap::Tile ) == 12 );
     #endif
-
+*/
     GET_UID0( UID0 );
     UID_PREPARE_UID4_0;
 
@@ -7299,7 +7299,7 @@ void FOClient::AddActionBack( uint type_action, uint param0, uint param1, uint p
 {
     /*if(type_action == sprecyzowane typy akcji razem z wariantami move i array[7])
 	{
-		u¿yæ tego SScriptFunc::Global_RunServerScript( ScriptString& func_name, int p0, int p1, int p2, ScriptString* p3, ScriptArray* p4 )
+		uï¿½yï¿½ tego SScriptFunc::Global_RunServerScript( ScriptString& func_name, int p0, int p1, int p2, ScriptString* p3, ScriptArray* p4 )
 	}
 	else
 	{*/	

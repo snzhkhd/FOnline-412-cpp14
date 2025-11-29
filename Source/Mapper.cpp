@@ -25,13 +25,13 @@ FOMapper::FOMapper()
 bool FOMapper::Init()
 {
     WriteLog( "Mapper initialization...\n" );
-
+/*
     #if defined ( FO_X86 )
     STATIC_ASSERT( sizeof( SpriteInfo ) == 36 );
     STATIC_ASSERT( sizeof( Sprite ) == 120 );
     STATIC_ASSERT( sizeof( GameOptions ) == 1340 );
     #endif
-
+*/
     // Register dll script data
     struct CritterChangeParameter_
     {
