@@ -32,8 +32,19 @@ public:
     char* GetBuffer();
     int   GetInt( const char* app_name, const char* key_name, int def_val );
     int   GetInt( const char* key_name, int def_val );
-    bool  GetStr( const char* app_name, const char* key_name, const char* def_val, char* ret_buf, char end = 0 );
-    bool  GetStr( const char* key_name, const char* def_val, char* ret_buf, char end = 0 );
+    bool  GetStrBounded( const char* app_name, const char* key_name, const char* def_val, char* ret_buf, uint capacity, char end = 0 );
+    template< size_t N >
+    bool GetStr( const char* app_name, const char* key_name, const char* def_val, char ( &ret_buf )[ N ], char end = 0 )
+    {
+        return GetStrBounded( app_name, key_name, def_val, ret_buf, N, end );
+    }
+
+    template< size_t N >
+    bool GetStr( const char* key_name, const char* def_val, char ( &ret_buf )[ N ], char end = 0 )
+    {
+        return GetStrBounded( NULL, key_name, def_val, ret_buf, N, end );
+    }
+
     void  SetStr( const char* app_name, const char* key_name, const char* val ); // If key not founded than writes to end of file despite app
     void  SetStr( const char* key_name, const char* val );
     bool  IsApp( const char* app_name );

@@ -12,15 +12,21 @@
 
 void* ASDebugMalloc( size_t size )
 {
+    if( size > SIZE_MAX - sizeof( size_t ) )
+        return NULL;
     size += sizeof( size_t );
-    MEMORY_PROCESS( MEMORY_ANGEL_SCRIPT, (int) size );
     size_t* ptr = (size_t*) malloc( size );
+    if( !ptr )
+        return NULL;
     *ptr = size;
+    MEMORY_PROCESS( MEMORY_ANGEL_SCRIPT, (int) size );
     return ++ptr;
 }
 
 void ASDebugFree( void* ptr )
 {
+    if( !ptr )
+        return;
     size_t* ptr_ = (size_t*) ptr;
     size_t  size = *( --ptr_ );
     MEMORY_PROCESS( MEMORY_ANGEL_SCRIPT, -(int) size );
@@ -35,8 +41,12 @@ static Mutex                ASDbgMemoryLocker;
 
 void* ASDeepDebugMalloc( size_t size )
 {
+    if( size > SIZE_MAX - sizeof( size_t ) )
+        return NULL;
     size += sizeof( size_t );
     size_t* ptr = (size_t*) malloc( size );
+    if( !ptr )
+        return NULL;
     *ptr = size;
 
     if( ASDbgMemoryCanWork && !ASDbgMemoryInUse )
@@ -57,6 +67,8 @@ void* ASDeepDebugMalloc( size_t size )
 
 void ASDeepDebugFree( void* ptr )
 {
+    if( !ptr )
+        return;
     size_t* ptr_ = (size_t*) ptr;
     size_t  size = *( --ptr_ );
 

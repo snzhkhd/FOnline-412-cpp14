@@ -1948,8 +1948,8 @@ Animation3dEntity::~Animation3dEntity()
             {
                 SAFEDELA( link.EffectInst[ i ].Defaults[ j ].Name );
                 SAFEDELA( link.EffectInst[ i ].Defaults[ j ].Data );
-                SAFEDELA( link.EffectInst[ i ].Defaults );
             }
+            SAFEDELA( link.EffectInst[ i ].Defaults );
         }
         SAFEDELA( link.EffectInst );
     }

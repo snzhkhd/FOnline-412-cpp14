@@ -189,25 +189,28 @@ void Str::Upper( char* str )
 
 uint Str::UpperUTF8( uint ucs )
 {
-    // Taked from FLTK
-    static unsigned short* table = NULL;
-    if( !table )
-    {
-        table = (unsigned short*) malloc( sizeof( unsigned short ) * 0x10000 );
-        for( uint i = 0; i < 0x10000; i++ )
-        {
-            table[ i ] = (unsigned short) i;
-        }
-        for( uint i = 0; i < 0x10000; i++ )
-        {
-            uint l = LowerUTF8( i );
-            if( l != i )
-                table[ l ] = (unsigned short) i;
-        }
-    }
     if( ucs >= 0x10000 )
         return ucs;
-    return table[ ucs ];
+
+    // Based on the FLTK Unicode case tables.
+    struct UppercaseTable
+    {
+        unsigned short Values[ 0x10000 ];
+
+        UppercaseTable()
+        {
+            for( uint i = 0; i < 0x10000; i++ )
+                Values[ i ] = (unsigned short) i;
+            for( uint i = 0; i < 0x10000; i++ )
+            {
+                const uint lower = LowerUTF8( i );
+                if( lower != i && lower < 0x10000 )
+                    Values[ lower ] = (unsigned short) i;
+            }
+        }
+    };
+    static const UppercaseTable table;
+    return table.Values[ ucs ];
 }
 
 void Str::UpperUTF8( char* str )

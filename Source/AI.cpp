@@ -136,7 +136,8 @@ bool NpcAIMngr::LoadNpcBags()
 
     int                 end_bag = bags_txt.GetInt( "end_bag", -1 );
     int                 bag_count = 0;
-    char*               bag_str = new char[ 0x10000 ];
+    const uint          bag_capacity = 0x10000;
+    char*               bag_str = new char[ bag_capacity ];
     StringNpcBagCombMap loaded_comb;
 
     npcBags.resize( end_bag + 1 );
@@ -144,7 +145,7 @@ bool NpcAIMngr::LoadNpcBags()
 
     for( int i = 0; i <= end_bag; i++ )
     {
-        if( !bags_txt.GetStr( Str::FormatBuf( "bag_%d", i ), "", bag_str ) )
+        if( !bags_txt.GetStrBounded( NULL, Str::FormatBuf( "bag_%d", i ), "", bag_str, bag_capacity ) )
             continue;
         NpcBag& cur_bag = npcBags[ i ];
 
@@ -158,7 +159,7 @@ bool NpcAIMngr::LoadNpcBags()
             if( it == loaded_comb.end() )
             {
                 // Get combination line
-                if( !bags_txt.GetStr( c.c_str(), "", bag_str ) )
+                if( !bags_txt.GetStrBounded( NULL, c.c_str(), "", bag_str, bag_capacity ) )
                 {
                     WriteLog( "Items combination<%s> not found.\n", c.c_str() );
                     delete[] bag_str;

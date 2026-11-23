@@ -1468,8 +1468,7 @@ bool MapManager::GM_GroupToMap( GlobalMapGroup* group, Map* map, uint entire, us
             }
             hx = car_hx;
             hy = car_hy;
-            if( mdir < DIRS_COUNT )
-                dir = mdir;
+            dir = ( mdir < DIRS_COUNT ? mdir : rule->GetDir() );
         }
         else
         {

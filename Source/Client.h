@@ -233,7 +233,7 @@ public:
 
     const char* GetHoloText( uint str_num );
     const char* FmtGameText( uint str_num, ... );
-    const char* FmtCombatText( uint str_num, ... );
+    const char* FmtCombatText( uint str_num, uint action_points = 0 );
 
     #define DESC_INVENTORY_MAIN       ( 0 )
     #define DESC_INVENTORY_SPECIAL    ( 1 )

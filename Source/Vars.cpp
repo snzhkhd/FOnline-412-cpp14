@@ -211,6 +211,8 @@ bool VarManager::LoadTemplateVars( const char* str, TempVarVec& vars )
     int    var_max;
     uint   var_flags;
 
+    static_assert( VAR_NAME_LEN == 256, "Update the variable name scan width" );
+    const size_t initial_count = vars.size();
     char*  buf_begin = Str::Duplicate( str );
     Str::Replacement( buf_begin, '\r', ' ' );
     char*  buf = buf_begin;
@@ -221,9 +223,17 @@ bool VarManager::LoadTemplateVars( const char* str, TempVarVec& vars )
             continue;
         buf++;
 
-        if( sscanf( buf, "%hu%d%s%d%d%d%u", &var_id, &var_type, var_name, &var_start, &var_min, &var_max, &var_flags ) != 7 )
+        int name_end = 0;
+        if( sscanf( buf, "%hu%d%255s%n%d%d%d%u", &var_id, &var_type, var_name, &name_end, &var_start, &var_min, &var_max, &var_flags ) != 7 ||
+            !isspace( (unsigned char) buf[ name_end ] ) )
         {
             WriteLog( "Fail to scan var.\n" );
+            while( vars.size() > initial_count )
+            {
+                delete vars.back();
+                vars.pop_back();
+            }
+            delete[] buf_begin;
             return false;
         }
 

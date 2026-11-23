@@ -291,13 +291,13 @@ int IniParser::GetInt( const char* key_name, int def_val )
     return GetInt( NULL, key_name, def_val );
 }
 
-bool IniParser::GetStr( const char* app_name, const char* key_name, const char* def_val, char* ret_buf, char end /* = 0 */ )
+bool IniParser::GetStrBounded( const char* app_name, const char* key_name, const char* def_val, char* ret_buf, uint capacity, char end )
 {
     uint iter = 0, j = 0;
 
     // Check
-    if( !ret_buf )
-        goto label_DefVal;
+    if( !ret_buf || !capacity )
+        return false;
     if( !bufPtr )
         goto label_DefVal;
 
@@ -321,13 +321,13 @@ bool IniParser::GetStr( const char* app_name, const char* key_name, const char* 
 
             if( bufPtr[ iter ] == '\n' )
             {
-                if( j && ret_buf[ j - 1 ] != ' ' )
+                if( j && j < capacity - 1 && ret_buf[ j - 1 ] != ' ' )
                     ret_buf[ j++ ] = ' ';
                 continue;
             }
             if( bufPtr[ iter ] == ';' || bufPtr[ iter ] == '#' )
             {
-                if( j && ret_buf[ j - 1 ] != ' ' )
+                if( j && j < capacity - 1 && ret_buf[ j - 1 ] != ' ' )
                     ret_buf[ j++ ] = ' ';
                 GotoEol( iter );
                 continue;
@@ -339,8 +339,8 @@ bool IniParser::GetStr( const char* app_name, const char* key_name, const char* 
                 break;
         }
 
-        ret_buf[ j ] = bufPtr[ iter ];
-        j++;
+        if( j < capacity - 1 )
+            ret_buf[ j++ ] = bufPtr[ iter ];
     }
 
     // Erase white spaces and tabs from end
@@ -354,13 +354,8 @@ bool IniParser::GetStr( const char* app_name, const char* key_name, const char* 
 label_DefVal:
     ret_buf[ 0 ] = 0;
     if( def_val )
-        Str::Copy( ret_buf, MAX_FOTEXT, def_val );
+        Str::Copy( ret_buf, capacity, def_val );
     return false;
-}
-
-bool IniParser::GetStr( const char* key_name, const char* def_val, char* ret_buf, char end /* = 0 */ )
-{
-    return GetStr( NULL, key_name, def_val, ret_buf, end );
 }
 
 void IniParser::SetStr( const char* app_name, const char* key_name, const char* val )

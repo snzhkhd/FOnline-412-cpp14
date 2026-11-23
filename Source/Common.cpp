@@ -40,8 +40,10 @@ void SetCommandLine( uint argc, char** argv )
 
 // Default randomizer
 Randomizer DefaultRandomizer;
+Mutex      DefaultRandomizerLocker;
 int Random( int minimum, int maximum )
 {
+    SCOPE_LOCK( DefaultRandomizerLocker );
     return DefaultRandomizer.Random( minimum, maximum );
 }
 
@@ -1602,10 +1604,24 @@ Thread::~Thread()
 
 bool Thread::Start( void ( * func )( void* ), const char* name, void* arg /* = NULL */ )
 {
-    void** args = (void**) malloc( sizeof( void* ) * 3 );
     char*  name_ = Str::Duplicate( name );
+    if( !name_ )
+        return false;
+
+    void** args = (void**) malloc( sizeof( void* ) * 3 );
+    if( !args )
+    {
+        delete[] name_;
+        return false;
+    }
+
     args[ 0 ] = (void*) func, args[ 1 ] = arg, args[ 2 ] = name_;
     isStarted = ( pthread_create( &threadId, &threadAttr, ThreadBeginExecution, args ) == 0 );
+    if( !isStarted )
+    {
+        delete[] name_;
+        free( args );
+    }
     return isStarted;
 }
 

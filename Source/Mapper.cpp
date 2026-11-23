@@ -6346,7 +6346,7 @@ void FOMapper::SScriptFunc::Global_MoveHexByDir( ushort& hx, ushort& hy, uchar d
 ScriptString* FOMapper::SScriptFunc::Global_GetIfaceIniStr( ScriptString& key )
 {
     char* big_buf = Str::GetBigBuf();
-    if( Self->IfaceIni.GetStr( key.c_str(), "", big_buf ) )
+    if( Self->IfaceIni.GetStrBounded( NULL, key.c_str(), "", big_buf, BIG_BUF_SIZE ) )
         return new ScriptString( big_buf );
     return new ScriptString( "" );
 }

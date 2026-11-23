@@ -191,6 +191,7 @@ DialogPack* DialogManager::ParseDialog( const char* name, uint id, const char* d
         return NULL;
     }
 
+    uint dlg_id = 0;
     #define LOAD_FAIL( err )    { AddError( err ); goto load_false; }
     DialogPack* pack = new DialogPack( id, string( name ) );
     char*       dlg_buf = fodlg.GetApp( "dialog" );
@@ -231,11 +232,9 @@ DialogPack* DialogManager::ParseDialog( const char* name, uint id, const char* d
         LOAD_FAIL( "Dialog section not found." );
 
     char ch;
-    input >> ch;
-    if( ch != '&' )
-        return NULL;
+    if( !( input >> ch ) || ch != '&' )
+        LOAD_FAIL( "Bad dialog section marker." );
 
-    uint dlg_id;
     uint text_id;
     uint link;
     char read_str[ 256 ];
@@ -385,7 +384,7 @@ load_done:
     return pack;
 
 load_false:
-    AddError( "Bad node<%d>.", dlg_id );
+    AddError( "Bad node<%u>.", dlg_id );
     WriteLogF( _FUNC_, " - Errors:\n%s", LastErrors.c_str() );
     delete pack;
     SAFEDELA( dlg_buf );

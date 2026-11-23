@@ -3873,6 +3873,7 @@ bool FOServer::InitLangPacks( LangPackVec& lang_packs )
 bool FOServer::InitLangPacksDialogs( LangPackVec& lang_packs )
 {
     // Parse dialog texts with one seed to prevent MSG numbers truncation
+    SCOPE_LOCK( DefaultRandomizerLocker );
     Randomizer def_rnd = DefaultRandomizer;
     DefaultRandomizer.Generate( 666666 );
 

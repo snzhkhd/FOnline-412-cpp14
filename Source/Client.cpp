@@ -8723,21 +8723,38 @@ const char* FOClient::FmtGameText( uint str_num, ... )
     return res;
 }
 
-const char* FOClient::FmtCombatText( uint str_num, ... )
+const char* FOClient::FmtCombatText( uint str_num, uint action_points )
 {
-//	return Str::FormatBuf(MsgCombat->GetStr(str_num),(void*)(_ADDRESSOF(str_num)+_INTSIZEOF(str_num)));
+    const char* text = MsgCombat->GetStr( str_num );
+    if( str_num != STR_COMBAT_NEED_AP )
+        return text;
 
-    static char res[ MAX_FOTEXT ];
-    static char str[ MAX_FOTEXT ];
+    static char result[ MAX_FOTEXT ];
+    char points[ 16 ];
+    snprintf( points, sizeof( points ), "%u", action_points );
 
-    Str::Copy( str, MsgCombat->GetStr( str_num ) );
-
-    va_list list;
-    va_start( list, str_num );
-    vsprintf( res, str, list );
-    va_end( list );
-
-    return res;
+    // The localized message takes one action-point count. Copy other text literally.
+    size_t length = 0;
+    bool substituted = false;
+    for( ; *text && length < sizeof( result ) - 1; ++text )
+    {
+        if( text[ 0 ] == '%' )
+        {
+            if( text[ 1 ] == '%' )
+                ++text;
+            else if( !substituted && ( text[ 1 ] == 'd' || text[ 1 ] == 'i' || text[ 1 ] == 'u' ) )
+            {
+                Str::Copy( result + length, sizeof( result ) - length, points );
+                length += Str::Length( result + length );
+                substituted = true;
+                ++text;
+                continue;
+            }
+        }
+        result[ length++ ] = *text;
+    }
+    result[ length ] = 0;
+    return result;
 }
 
 const char* FOClient::FmtGenericDesc( int desc_type, int& ox, int& oy )
@@ -11106,7 +11123,7 @@ bool FOClient::SScriptFunc::Global_AppendIfaceIni( ScriptString& ini_name )
 ScriptString* FOClient::SScriptFunc::Global_GetIfaceIniStr( ScriptString& key )
 {
     char* big_buf = Str::GetBigBuf();
-    if( Self->IfaceIni.GetStr( key.c_str(), "", big_buf ) )
+    if( Self->IfaceIni.GetStrBounded( NULL, key.c_str(), "", big_buf, BIG_BUF_SIZE ) )
         return new ScriptString( big_buf );
     return new ScriptString( "" );
 }

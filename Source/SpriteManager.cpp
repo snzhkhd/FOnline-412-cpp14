@@ -1999,6 +1999,7 @@ AnyFrames* SpriteManager::LoadAnimationFofrm( const char* fname, int path_type, 
     char    frm_fname[ MAX_FOPATH ];
     FileManager::ExtractPath( fname, frm_fname );
     char*   frm_name = frm_fname + Str::Length( frm_fname );
+    const uint frm_name_capacity = sizeof( frm_fname ) - ( frm_name - frm_fname );
 
     AnimVec anims;
     IntVec  anims_offs;
@@ -2010,8 +2011,8 @@ AnyFrames* SpriteManager::LoadAnimationFofrm( const char* fname, int path_type, 
         anims_offs.push_back( fofrm.GetInt( no_app ? NULL : dir_str, Str::FormatBuf( "next_x_%d", frm ), 0 ) );
         anims_offs.push_back( fofrm.GetInt( no_app ? NULL : dir_str, Str::FormatBuf( "next_y_%d", frm ), 0 ) );
 
-        if( !fofrm.GetStr( no_app ? NULL : dir_str, Str::FormatBuf( "frm_%d", frm ), "", frm_name ) &&
-            ( frm != 0 || !fofrm.GetStr( no_app ? NULL : dir_str, Str::FormatBuf( "frm", frm ), "", frm_name ) ) )
+        if( !fofrm.GetStrBounded( no_app ? NULL : dir_str, Str::FormatBuf( "frm_%d", frm ), "", frm_name, frm_name_capacity ) &&
+            ( frm != 0 || !fofrm.GetStrBounded( no_app ? NULL : dir_str, "frm", "", frm_name, frm_name_capacity ) ) )
             goto label_Fail;
 
         AnyFrames* anim = LoadAnimation( frm_fname, path_type, ANIM_DIR( dir ) );

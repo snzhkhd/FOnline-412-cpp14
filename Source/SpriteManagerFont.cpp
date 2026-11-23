@@ -1060,7 +1060,11 @@ bool SpriteManager::DrawStr( const Rect& r, const char* str, uint flags, uint co
         return false;
 
     char*    str_ = fi.PStr;
-    uint     offs_col = fi.OffsColDots;
+    const uint offs_col = fi.OffsColDots;
+    if( !FLAG( flags, FT_NO_COLORIZE ) &&
+        ( offs_col >= FONT_BUF_LEN || Str::Length( str_ ) > FONT_BUF_LEN - offs_col ) )
+        return false;
+
     int      curx = fi.CurX;
     int      cury = fi.CurY;
     int      curstr = 0;

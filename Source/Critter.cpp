@@ -3388,8 +3388,11 @@ bool Critter::IsTransferTimeouts( bool send )
 
 void Critter::AddEnemyInStack( uint crid )
 {
+    const int stack_count = MIN( Data.EnemyStackCount, MAX_ENEMY_STACK );
+    if( !stack_count )
+        return;
+
     // Find already
-    int stack_count = MIN( Data.EnemyStackCount, MAX_ENEMY_STACK );
     for( int i = 0; i < stack_count; i++ )
     {
         if( Data.EnemyStack[ i ] == crid )

@@ -127,6 +127,7 @@ extern uint   CommandLineArgCount;
 void SetCommandLine( uint argc, char** argv );
 
 extern Randomizer DefaultRandomizer;
+extern Mutex      DefaultRandomizerLocker;
 int Random( int minimum, int maximum );
 
 int  Procent( int full, int peace );
