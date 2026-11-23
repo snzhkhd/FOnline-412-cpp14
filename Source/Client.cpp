@@ -241,9 +241,14 @@ bool FOClient::Init()
     IniParser cfg;     // Also used below
     cfg.LoadFile( GetConfigFileName(), PT_ROOT );
     cfg.GetStr( CLIENT_CONFIG_APP, "UserPass", "", pass );
-    char* cmd_line_pass = Str::Substring( CommandLine, "-UserPass" );
-    if( cmd_line_pass )
-        sscanf( cmd_line_pass + Str::Length( "-UserPass" ) + 1, "%s", pass );
+    for( uint i = 1; i + 1 < CommandLineArgCount; ++i )
+    {
+        if( Str::Compare( CommandLineArgValues[ i ], "-UserPass" ) )
+        {
+            Str::Copy( pass, CommandLineArgValues[ i + 1 ] );
+            break;
+        }
+    }
     Password = pass;
 
     // User and password
@@ -4095,7 +4100,7 @@ void FOClient::OnText( const char* str, uint crid, int how_say, ushort intellect
 
     // Intellect format
     if( how_say >= SAY_NORM && how_say <= SAY_RADIO )
-        FmtTextIntellect( fstr, intellect );
+        FmtTextIntellect( fstr, sizeof( fstr ), intellect );
 
     // Type stream
     uint fstr_cr = 0;
@@ -4287,7 +4292,7 @@ void FOClient::OnMapText( const char* str, ushort hx, ushort hy, uint color, ush
     Str::Copy( fstr, sstr->c_str() );
     sstr->Release();
 
-    FmtTextIntellect( fstr, intellect );
+    FmtTextIntellect( fstr, sizeof( fstr ), intellect );
 
     MapText t;
     t.HexX = hx;
@@ -8828,8 +8833,8 @@ void FOClient::ParseIntellectWords( char* words, PCharPairVec& text )
     Str::SkipLine( words );
 
     bool parse_in = true;
-    char in[ MAX_FOTEXT ] = { 0 };
-    char out[ MAX_FOTEXT ] = { 0 };
+    string in;
+    string out;
 
     while( true )
     {
@@ -8841,25 +8846,16 @@ void FOClient::ParseIntellectWords( char* words, PCharPairVec& text )
             Str::SkipLine( words );
             parse_in = true;
 
-            uint in_len = Str::Length( in ) + 1;
-            uint out_len = Str::Length( out ) + 1;
-            if( in_len < 2 )
-                continue;
-
-            char* in_ = new char[ in_len ];
-            char* out_ = new char[ out_len ];
-            Str::Copy( in_, in_len, in );
-            Str::Copy( out_, out_len, out );
-
-            text.push_back( PAIR( in_, out_ ) );
-            in[ 0 ] = 0;
-            out[ 0 ] = 0;
+            if( !in.empty() && in.size() < MAX_FOTEXT && out.size() < MAX_FOTEXT )
+                text.push_back( PAIR( Str::Duplicate( in.c_str() ), Str::Duplicate( out.c_str() ) ) );
+            in.clear();
+            out.clear();
             continue;
         }
 
         if( *words == ' ' && *( words + 1 ) == ' ' && parse_in )
         {
-            if( !Str::Length( in ) )
+            if( in.empty() )
             {
                 Str::SkipLine( words );
             }
@@ -8871,7 +8867,7 @@ void FOClient::ParseIntellectWords( char* words, PCharPairVec& text )
             continue;
         }
 
-        strncat( parse_in ? in : out, words, 1 );
+        ( parse_in ? in : out ).push_back( *words );
         words++;
     }
 }
@@ -8905,7 +8901,7 @@ auto FOClient::FindIntellectWord( const char* word, PCharPairVec & text, Randomi
     return it;
 }
 
-void FOClient::FmtTextIntellect( char* str, ushort intellect )
+void FOClient::FmtTextIntellect( char* str, uint capacity, ushort intellect )
 {
     static bool is_parsed = false;
     if( !is_parsed )
@@ -8916,7 +8912,7 @@ void FOClient::FmtTextIntellect( char* str, ushort intellect )
     }
 
     uchar intellegence = intellect & 0xF;
-    if( !intellect || intellegence >= 5 )
+    if( !capacity || !intellect || intellegence >= 5 )
         return;
 
     int word_proc;
@@ -8944,65 +8940,68 @@ void FOClient::FmtTextIntellect( char* str, ushort intellect )
 
     Randomizer rnd( ( intellect << 16 ) | intellect );
 
-    char       word[ 1024 ] = { 0 };
-    while( true )
+    string rendered( str );
+    const size_t max_length = capacity - 1;
+    if( rendered.size() > max_length )
+        return;
+
+    size_t pos = 0;
+    while( pos < rendered.size() )
     {
-        while( *str )
+        const size_t word_begin = pos;
+        uint length = 0;
+        while( pos < rendered.size() )
         {
-            uint length;
-            Str::DecodeUTF8( str, &length );
-            if( length == 1 && !( ( *str >= 'a' && *str <= 'z' ) || ( *str >= 'A' && *str <= 'Z' ) ) )
+            Str::DecodeUTF8( rendered.c_str() + pos, &length );
+            const char ch = rendered[ pos ];
+            if( length == 1 && !( ( ch >= 'a' && ch <= 'z' ) || ( ch >= 'A' && ch <= 'Z' ) ) )
                 break;
-            strncat( word, str, length );
-            str += length;
+            pos += length;
         }
-
-        uint len = Str::Length( word );
-        if( len )
+        if( pos == word_begin )
         {
-            auto it = FindIntellectWord( word, IntellectWords, rnd );
-            if( it != IntellectWords.end() && rnd.Random( 1, 100 ) <= word_proc )
-            {
-                Str::EraseInterval( str - len, len );
-                Str::Insert( str - len, ( *it ).second );
-                str = str - len + Str::Length( ( *it ).second );
-            }
-            else
-            {
-                for( char* s = str - len; s < str;)
-                {
-                    if( rnd.Random( 1, 100 ) > symbol_proc )
-                        continue;
-
-                    uint length;
-                    Str::DecodeUTF8( s, &length );
-                    strncpy( word, s, length );
-                    word[ length ] = 0;
-
-                    it = FindIntellectWord( word, IntellectSymbols, rnd );
-                    if( it != IntellectSymbols.end() )
-                    {
-                        uint f_len = Str::Length( ( *it ).first );
-                        uint s_len = Str::Length( ( *it ).second );
-                        Str::EraseInterval( s, f_len );
-                        Str::Insert( s, ( *it ).second );
-                        str -= f_len;
-                        str += s_len;
-                    }
-
-                    s += length;
-                }
-            }
-            word[ 0 ] = 0;
+            pos += length;
+            continue;
         }
 
-        if( *str == 0 )
-            break;
-
-        uint length;
-        Str::DecodeUTF8( str, &length );
-        str += length;
+        const size_t word_length = pos - word_begin;
+        const string word = rendered.substr( word_begin, word_length );
+        auto replacement = FindIntellectWord( word.c_str(), IntellectWords, rnd );
+        if( replacement != IntellectWords.end() && rnd.Random( 1, 100 ) <= word_proc )
+        {
+            const size_t replacement_length = Str::Length( replacement->second );
+            if( replacement_length <= max_length - ( rendered.size() - word_length ) )
+            {
+                rendered.replace( word_begin, word_length, replacement->second, replacement_length );
+                pos = word_begin + replacement_length;
+            }
+        }
+        else
+        {
+            for( size_t symbol = word_begin; symbol < pos; )
+            {
+                Str::DecodeUTF8( rendered.c_str() + symbol, &length );
+                size_t advance = length;
+                if( rnd.Random( 1, 100 ) <= symbol_proc )
+                {
+                    const string glyph = rendered.substr( symbol, length );
+                    replacement = FindIntellectWord( glyph.c_str(), IntellectSymbols, rnd );
+                    if( replacement != IntellectSymbols.end() )
+                    {
+                        const size_t replacement_length = Str::Length( replacement->second );
+                        if( replacement_length <= max_length - ( rendered.size() - length ) )
+                        {
+                            rendered.replace( symbol, length, replacement->second, replacement_length );
+                            pos = pos - length + replacement_length;
+                            advance = replacement_length;
+                        }
+                    }
+                }
+                symbol += advance;
+            }
+        }
     }
+    Str::Copy( str, capacity, rendered.c_str() );
 }
 
 bool FOClient::SaveLogFile()

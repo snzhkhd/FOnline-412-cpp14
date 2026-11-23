@@ -249,10 +249,14 @@ bool VarManager::LoadTemplateVars( const char* str, TempVarVec& vars )
             char* mark2 = strstr( mark, VAR_DESC_MARK );
             if( !mark2 )
                 break;
-            *( mark2 - 1 ) = 0;
+            char* desc_end = mark2;
+            if( desc_end > mark && desc_end[ -1 ] == '\n' )
+                --desc_end;
+            *desc_end = 0;
             Str::Copy( var_desc, mark );
 
-            buf = mark2 + sizeof( VAR_DESC_MARK );
+            // The loop advances once more, including when the marker ends the file.
+            buf = mark2 + sizeof( VAR_DESC_MARK ) - 2;
         }
         while( false );
 

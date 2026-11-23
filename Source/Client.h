@@ -260,7 +260,7 @@ public:
 
     void ParseIntellectWords( char* words, PCharPairVec& text );
     auto FindIntellectWord( const char* word, PCharPairVec & text, Randomizer & rnd )->PCharPairVec::iterator;
-    void FmtTextIntellect( char* str, ushort intellect );
+    void FmtTextIntellect( char* str, uint capacity, ushort intellect );
 
     #define SMTH_NONE                 ( 0 )
     #define SMTH_CRITTER              ( 1 )

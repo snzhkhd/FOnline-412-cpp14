@@ -4104,10 +4104,20 @@ void FOServer::LoadBans()
         if( bans_txt.GetStr( "Ban", "User", "", buf ) )
             Str::Copy( ban.ClientName, buf );
         ban.ClientIp = bans_txt.GetInt( "Ban", "UserIp", 0 );
-        if( bans_txt.GetStr( "Ban", "BeginTime", "", buf ) && sscanf( buf, "%hu%hu%hu%hu%hu", &time.Year, &time.Month, &time.Day, &time.Hour, &time.Minute ) )
-            ban.BeginTime = time;
-        if( bans_txt.GetStr( "Ban", "EndTime", "", buf ) && sscanf( buf, "%hu%hu%hu%hu%hu", &time.Year, &time.Month, &time.Day, &time.Hour, &time.Minute ) )
-            ban.EndTime = time;
+        if( !bans_txt.GetStr( "Ban", "BeginTime", "", buf ) ||
+            sscanf( buf, "%hu%hu%hu%hu%hu", &time.Year, &time.Month, &time.Day, &time.Hour, &time.Minute ) != 5 )
+        {
+            WriteLog( "Skipping ban with invalid start time.\n" );
+            continue;
+        }
+        ban.BeginTime = time;
+        if( !bans_txt.GetStr( "Ban", "EndTime", "", buf ) ||
+            sscanf( buf, "%hu%hu%hu%hu%hu", &time.Year, &time.Month, &time.Day, &time.Hour, &time.Minute ) != 5 )
+        {
+            WriteLog( "Skipping ban with invalid end time.\n" );
+            continue;
+        }
+        ban.EndTime = time;
         if( bans_txt.GetStr( "Ban", "BannedBy", "", buf ) )
             Str::Copy( ban.BannedBy, buf );
         if( bans_txt.GetStr( "Ban", "Comment", "", buf ) )
