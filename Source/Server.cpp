@@ -3121,14 +3121,7 @@ void FOServer::Process_Command( BufferManager& buf, void ( * logcb )( const char
         CHECK_ALLOW_COMMAND;
         CHECK_ADMIN_PANEL;
 
-        ClientData* data = GetClientData( cl_->GetId() );
-        if( data )
-        {
-            for( int i = 0; i < 5; i++ )
-                data->UID[ i ] = 0;
-            data->UIDEndTick = 0;
-        }
-        logcb( "UID dropped, you can relogin on another account without timeout." );
+        logcb( "UID reservations end automatically when the connection closes." );
     }
     break;
     case CMD_LOG:

@@ -1968,66 +1968,42 @@ void FOServer::Process_LogIn( ClientPtr& cl )
             return;
         }
 
-        SCOPE_LOCK( ClientsDataLocker );
-
-        uint tick = Timer::FastTick();
-        for( auto it = ClientsData.begin(), end = ClientsData.end(); it != end; ++it )
+        string uid_owner;
         {
-            ClientData& cd = *it;
-            if( cd.ClientId == data.ClientId )
-                continue;
-
-            int matches = 0;
-            if( !uid[ 0 ] || uid[ 0 ] == cd.UID[ 0 ] )
-                matches++;
-            if( !uid[ 1 ] || uid[ 1 ] == cd.UID[ 1 ] )
-                matches++;
-            if( !uid[ 2 ] || uid[ 2 ] == cd.UID[ 2 ] )
-                matches++;
-            if( !uid[ 3 ] || uid[ 3 ] == cd.UID[ 3 ] )
-                matches++;
-            if( !uid[ 4 ] || uid[ 4 ] == cd.UID[ 4 ] )
-                matches++;
-
-            if( matches >= 5 )
+            // Keep the check and reservation atomic across login jobs. Removal from
+            // ConnectedClients releases the reservation after the connection closes.
+            SCOPE_LOCK( ConnectedClientsLocker );
+            for( Client* connected : ConnectedClients )
             {
-                if( !cd.UIDEndTick || tick >= cd.UIDEndTick )
+                if( connected == cl || !std::any_of( connected->UID, connected->UID + 5, []( uint value ) { return value != 0; } ) )
+                    continue;
+
+                bool matches = true;
+                for( int i = 0; i < 5; ++i )
                 {
-                    for( int i = 0; i < 5; i++ )
-                        cd.UID[ i ] = 0;
-                    cd.UIDEndTick = 0;
+                    if( uid[ i ] && uid[ i ] != connected->UID[ i ] )
+                    {
+                        matches = false;
+                        break;
+                    }
                 }
-                else
+                if( matches )
                 {
-                    WriteLogF( _FUNC_, " - UID already used by critter<%s>, client<%s>.\n", cd.ClientName, cl->Name );
-                    cl->Send_TextMsg( cl, STR_NET_UID_FAIL, SAY_NETMSG, TEXTMSG_GAME );
-                    cl->Disconnect();
-                    return;
+                    uid_owner = connected->Name;
+                    break;
                 }
             }
+
+            if( uid_owner.empty() )
+                memcpy( cl->UID, uid, sizeof( cl->UID ) );
         }
 
-        for( int i = 0; i < 5; i++ )
+        if( !uid_owner.empty() )
         {
-            if( data.UID[ i ] != uid[ i ] )
-            {
-                if( !data.UIDEndTick || tick >= data.UIDEndTick )
-                {
-                    // Set new uids on this account and start play timeout
-                    ClientData* data_ = GetClientData( cl->Name );
-                    for( int j = 0; j < 5; j++ )
-                        data_->UID[ j ] = uid[ j ];
-                    data_->UIDEndTick = tick + GameOpt.AccountPlayTime * 1000;
-                }
-                else
-                {
-                    WriteLogF( _FUNC_, " - Different UID<%d>, client<%s>.\n", i, cl->Name );
-                    cl->Send_TextMsg( cl, STR_NET_UID_FAIL, SAY_NETMSG, TEXTMSG_GAME );
-                    cl->Disconnect();
-                    return;
-                }
-                break;
-            }
+            WriteLogF( _FUNC_, " - UID already used by critter<%s>, client<%s>.\n", uid_owner.c_str(), cl->Name );
+            cl->Send_TextMsg( cl, STR_NET_UID_FAIL, SAY_NETMSG, TEXTMSG_GAME );
+            cl->Disconnect();
+            return;
         }
     }
     #endif
@@ -2098,7 +2074,8 @@ void FOServer::Process_LogIn( ClientPtr& cl )
             return;
         }
 
-        // Assign to ConnectedClients
+        // Transfer the UID reservation with the connection.
+        memcpy( cl_old->UID, cl->UID, sizeof( cl_old->UID ) );
         cl_old->AddRef();
         ( *it ) = cl_old;
 
@@ -2317,8 +2294,7 @@ void FOServer::Process_LogIn( ClientPtr& cl )
     }
 
     cl->Data.Params[ MODE_DEFAULT_COMBAT ] = default_combat_mode;
-    for( int i = 0; i < 5; i++ )
-        cl->UID[ i ] = uid[ i ];
+
 
     // Play ip
     CritDataExt* data_ext = cl->GetDataExt();
@@ -3904,16 +3880,7 @@ void FOServer::Process_Ping( Client* cl )
     else if( ping == PING_UID_FAIL )
     {
         #ifndef DEV_VESRION
-        SCOPE_LOCK( ClientsDataLocker );
-
-        ClientData* data = GetClientData( cl->GetId() );
-        if( data )
-        {
-            WriteLogF( _FUNC_, " - Wrong UID, client<%s>. Disconnect.\n", cl->GetInfo() );
-            for( int i = 0; i < 5; i++ )
-                data->UID[ i ] = Random( 0, 10000 );
-            data->UIDEndTick = Timer::FastTick() + GameOpt.AccountPlayTime * 1000;
-        }
+        WriteLogF( _FUNC_, " - Wrong UID, client<%s>. Disconnect.\n", cl->GetInfo() );
         cl->Disconnect();
         return;
         #endif

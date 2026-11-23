@@ -411,8 +411,6 @@ public:
         char ClientPassHash[ PASS_HASH_SIZE ];
         uint ClientId;
         uint SaveIndex;
-        uint UID[ 5 ];
-        uint UIDEndTick;
         void Clear()                        { memzero( this, sizeof( ClientData ) ); }
         bool operator==( const char* name ) { return Str::CompareCaseUTF8( name, ClientName ); }
         bool operator==( const uint id )    { return ClientId == id; }
