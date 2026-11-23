@@ -121,6 +121,11 @@ set(COMMON_MISC_SOURCES
 )
 
 # Client target
+option(FONLINE_CLIENT_D3D "Build the Windows client with Direct3D 9" OFF)
+if(FONLINE_CLIENT_D3D AND (NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 4))
+    message(FATAL_ERROR "FONLINE_CLIENT_D3D requires an MSVC Win32 build")
+endif()
+
 set(CLIENT_SOURCES
     ${COMMON_ANGELSCRIPT_SOURCES}
     ${COMMON_ZLIB_SOURCES}
@@ -151,13 +156,18 @@ set(CLIENT_SOURCES
     Source/StdAfx.cpp
     Source/MainClient.cpp
     Source/Acm/acmstrm.cpp
-    Source/GL/glew.c
     Source/LegacyFix.cpp
 )
 
 add_executable(FOnlineClient ${CLIENT_SOURCES})
 target_include_directories(FOnlineClient PRIVATE ${COMMON_INCLUDE_DIRS} Source/Dx9)
 target_compile_definitions(FOnlineClient PRIVATE ${COMMON_COMPILE_DEFINITIONS} FONLINE_CLIENT AS_NO_THREADS)
+if(FONLINE_CLIENT_D3D)
+    target_compile_definitions(FOnlineClient PRIVATE FO_D3D)
+    set_target_properties(FOnlineClient PROPERTIES OUTPUT_NAME FOnlineD3D)
+else()
+    target_sources(FOnlineClient PRIVATE Source/GL/glew.c)
+endif()
 target_link_libraries(FOnlineClient PRIVATE Threads::Threads)
 if(MSVC)
 
@@ -171,6 +181,9 @@ if(MSVC)
     target_compile_definitions(FOnlineClient PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
 endif()
 if(WIN32)
+    if(NOT FONLINE_CLIENT_D3D)
+        target_link_libraries(FOnlineClient PRIVATE opengl32 glu32)
+    endif()
     target_link_libraries(FOnlineClient PRIVATE
         dinput8
         dxguid
@@ -178,8 +191,6 @@ if(WIN32)
         ws2_32
         dsound
         ddraw
-        opengl32
-        glu32
         legacy_stdio_definitions.lib
         oldnames.lib
     )
