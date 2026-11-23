@@ -1,0 +1,117 @@
+diff --git a/sdk/Server/scripts/fonline.h b/sdk/Server/scripts/fonline.h
+index da0461c..6634f57 100644
+--- a/sdk/Server/scripts/fonline.h
++++ b/sdk/Server/scripts/fonline.h
+@@ -219,7 +219,7 @@ EXPORT_UNINITIALIZED const char* (ScriptGetLibraryVersion) ( );
+ 
+ #define LEXEMS_SIZE                  ( 128 )
+ #define MAX_HOLO_INFO                ( 250 )
+-#define SCORES_MAX                   ( 50 )
++#define SCORES_MAX                   ( 100 )
+ #define MAX_NPC_BAGS_PACKS           ( 20 )
+ #define MAX_ENEMY_STACK              ( 30 )
+ #define MAX_NPC_BAGS                 ( 50 )
+diff --git a/sdk/Server/scripts/fonline_tla.cpp b/sdk/Server/scripts/fonline_tla.cpp
+index 28c27bf..71f9a38 100644
+--- a/sdk/Server/scripts/fonline_tla.cpp
++++ b/sdk/Server/scripts/fonline_tla.cpp
+@@ -1,4 +1,5 @@
+ #include "fonline_tla.h"
++#include "fonline_tla_abi.h"
+ 
+ // Extern data definition
+ _GlobalVars GlobalVars;
+diff --git a/sdk/Server/scripts/fonline_tla_abi.h b/sdk/Server/scripts/fonline_tla_abi.h
+new file mode 100644
+index 0000000..00b33cb
+--- /dev/null
++++ b/sdk/Server/scripts/fonline_tla_abi.h
+@@ -0,0 +1,88 @@
++#pragma once
++
++#include <stddef.h>
++
++// Native TLA DLL layout for the C++14 Win32 engine.
++#if defined ( FO_MSVC ) && defined ( FO_X86 ) && defined ( _MSVC_STL_VERSION )
++static_assert( _ITERATOR_DEBUG_LEVEL == 0, "The engine uses the MSVC STL without iterator debugging" );
++
++#define FONLINE_ABI_SIZE( type, size ) static_assert( sizeof( type ) == size, #type " size differs from engine" )
++#define FONLINE_ABI_OFFSET( type, field, offset ) static_assert( offsetof( type, field ) == offset, #type "::" #field " offset differs from engine" )
++
++FONLINE_ABI_SIZE( GameOptions, 1340 );
++FONLINE_ABI_SIZE( ProtoItem, 908 );
++FONLINE_ABI_OFFSET( Item, Id, 0 );
++FONLINE_ABI_OFFSET( Item, Proto, 4 );
++FONLINE_ABI_OFFSET( Item, Data.Count, 60 );
++FONLINE_ABI_OFFSET( Item, Data.Deterioration, 110 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimArms, 208 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimEyes, 192 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimGroin, 200 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimHead, 196 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimLegs, 212 );
++FONLINE_ABI_OFFSET( GameOptions, ApCostAimTorso, 204 );
++FONLINE_ABI_OFFSET( GameOptions, CritterChangeParameter, 1148 );
++FONLINE_ABI_OFFSET( GameOptions, CritterTypes, 1152 );
++FONLINE_ABI_OFFSET( GameOptions, FullSecond, 28 );
++FONLINE_ABI_OFFSET( GameOptions, GetAttackDistantion, 1332 );
++FONLINE_ABI_OFFSET( GameOptions, GetRainOffset, 1336 );
++FONLINE_ABI_OFFSET( GameOptions, GetUseApCost, 1328 );
++FONLINE_ABI_OFFSET( GameOptions, Hour, 18 );
++FONLINE_ABI_OFFSET( GameOptions, Minute, 20 );
++FONLINE_ABI_OFFSET( GameOptions, Random, 1316 );
++FONLINE_ABI_OFFSET( GameOptions, RtApCostReloadWeapon, 132 );
++FONLINE_ABI_OFFSET( GameOptions, RtApCostUseItem, 140 );
++FONLINE_ABI_OFFSET( GameOptions, TbApCostReloadWeapon, 172 );
++FONLINE_ABI_OFFSET( GameOptions, TbApCostUseItem, 180 );
++FONLINE_ABI_OFFSET( ProtoItem, Stackable, 20 );
++FONLINE_ABI_OFFSET( ProtoItem, Type, 4 );
++FONLINE_ABI_OFFSET( ProtoItem, Weapon_ActiveUses, 776 );
++FONLINE_ABI_OFFSET( ProtoItem, Weapon_ApCost, 828 );
++FONLINE_ABI_OFFSET( ProtoItem, Weapon_MaxDist, 804 );
++FONLINE_ABI_OFFSET( ProtoItem, Weapon_Perk, 772 );
++FONLINE_ABI_OFFSET( ProtoItem, Weapon_Skill, 780 );
++FONLINE_ABI_OFFSET( ProtoItem, Weight, 36 );
++FONLINE_ABI_SIZE( CritterType, 188 );
++FONLINE_ABI_OFFSET( CritterType, Multihex, 136 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_AC, 336 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRElectr, 360 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DREmp, 364 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRExplode, 368 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRFire, 352 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRLaser, 348 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRNormal, 344 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DRPlasma, 356 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTElectr, 388 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTEmp, 392 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTExplode, 396 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTFire, 380 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTLaser, 376 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTNormal, 372 );
++FONLINE_ABI_OFFSET( ProtoItem, Armor_DTPlasma, 384 );
++
++#if defined ( __SERVER )
++FONLINE_ABI_SIZE( Item, 196 );
++FONLINE_ABI_OFFSET( Critter, DataExt, 7604 );
++FONLINE_ABI_OFFSET( Critter, VisCrMap, 9132 );
++FONLINE_ABI_OFFSET( Critter, VisItem, 9172 );
++FONLINE_ABI_OFFSET( Critter, GroupSelf, 9208 );
++FONLINE_ABI_OFFSET( Critter, ItemSlotArmor, 9244 );
++FONLINE_ABI_OFFSET( Critter, FuncId, 9248 );
++FONLINE_ABI_OFFSET( Critter, RefCounter, 9492 );
++FONLINE_ABI_OFFSET( Client, LanguageMsg, 9652 );
++FONLINE_ABI_OFFSET( Npc, Reserved, 9512 );
++FONLINE_ABI_OFFSET( Critter, Params, 72 );
++FONLINE_ABI_OFFSET( Critter, BaseType, 12 );
++FONLINE_ABI_OFFSET( Critter, Multihex, 38 );
++FONLINE_ABI_OFFSET( Critter, InvItems, 9216 );
++#elif defined ( __CLIENT )
++FONLINE_ABI_SIZE( Item, 180 );
++FONLINE_ABI_OFFSET( CritterCl, Params, 12 );
++FONLINE_ABI_OFFSET( CritterCl, BaseType, 4076 );
++FONLINE_ABI_OFFSET( CritterCl, Multihex, 4088 );
++FONLINE_ABI_OFFSET( CritterCl, ItemSlotArmor, 4276 );
++#endif
++
++#undef FONLINE_ABI_OFFSET
++#undef FONLINE_ABI_SIZE
++#endif
