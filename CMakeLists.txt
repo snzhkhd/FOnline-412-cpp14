@@ -20,17 +20,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Find required packages
 find_package(Threads REQUIRED)
 
-# Check if we're on Windows and find additional libraries
-if(WIN32)
-    # On Windows, we might need additional libraries
-    find_library(DINPUT8_LIBRARY dinput8)
-    find_library(DXGUID_LIBRARY dxguid)
-    find_library(WINMM_LIBRARY winmm)
-    find_library(WS2_32_LIBRARY ws2_32)
-    find_library(DSOUND_LIBRARY dsound)
-    find_library(DDRAW_LIBRARY ddraw)
-endif()
-
 add_compile_definitions(_ITERATOR_DEBUG_LEVEL=0)
 
 # Define common include directories
@@ -183,12 +172,12 @@ if(MSVC)
 endif()
 if(WIN32)
     target_link_libraries(FOnlineClient PRIVATE
-        ${DINPUT8_LIBRARY}
-        ${DXGUID_LIBRARY}
-        ${WINMM_LIBRARY}
-        ${WS2_32_LIBRARY}
-        ${DSOUND_LIBRARY}
-        ${DDRAW_LIBRARY}
+        dinput8
+        dxguid
+        winmm
+        ws2_32
+        dsound
+        ddraw
         opengl32
         glu32
         legacy_stdio_definitions.lib
@@ -199,7 +188,7 @@ if(WIN32)
     target_link_libraries(FOnlineClient PRIVATE
         IL.lib jpeg.lib libogg_static.lib libpng15.lib libtheora_static.lib
         libvorbis_static.lib libvorbisfile_static.lib portaudio.lib pthreadVC2.lib
-        dxguid.lib d3d9.lib d3dx9.lib
+        d3d9.lib d3dx9.lib
     )
 endif()
 set_target_properties(FOnlineClient PROPERTIES
@@ -247,8 +236,8 @@ target_compile_definitions(FOnlineServer PRIVATE ${COMMON_COMPILE_DEFINITIONS} F
 target_link_libraries(FOnlineServer PRIVATE Threads::Threads)
 if(WIN32)
     target_link_libraries(FOnlineServer PRIVATE
-        ${WINMM_LIBRARY}
-        ${WS2_32_LIBRARY}
+        winmm
+        ws2_32
         legacy_stdio_definitions.lib
         oldnames.lib
     )
@@ -284,8 +273,8 @@ target_compile_definitions(ASCompiler PRIVATE ${COMMON_COMPILE_DEFINITIONS} FONL
 target_link_libraries(ASCompiler PRIVATE Threads::Threads)
 if(WIN32)
     target_link_libraries(ASCompiler PRIVATE
-        ${WINMM_LIBRARY}
-        ${WS2_32_LIBRARY}
+        winmm
+        ws2_32
         legacy_stdio_definitions.lib
         oldnames.lib
     )
@@ -338,12 +327,12 @@ target_compile_definitions(Mapper PRIVATE ${COMMON_COMPILE_DEFINITIONS} FONLINE_
 target_link_libraries(Mapper PRIVATE Threads::Threads)
 if(WIN32)
     target_link_libraries(Mapper PRIVATE
-        ${DINPUT8_LIBRARY}
-        ${DXGUID_LIBRARY}
-        ${WINMM_LIBRARY}
-        ${WS2_32_LIBRARY}
-        ${DSOUND_LIBRARY}
-        ${DDRAW_LIBRARY}
+        dinput8
+        dxguid
+        winmm
+        ws2_32
+        dsound
+        ddraw
         opengl32
         glu32
         legacy_stdio_definitions.lib
@@ -354,7 +343,7 @@ if(WIN32)
     target_link_libraries(Mapper PRIVATE
         IL.lib jpeg.lib libogg_static.lib libpng15.lib libtheora_static.lib
         libvorbis_static.lib libvorbisfile_static.lib portaudio.lib pthreadVC2.lib
-        dxguid.lib d3d9.lib d3dx9.lib
+        d3d9.lib d3dx9.lib
     )
 endif()
 set_target_properties(Mapper PROPERTIES

@@ -101,8 +101,7 @@ const char* GetLastSocketError();
     { if( x )         \
           delete[] ( x ); ( x ) = NULL; }
 
-//#define STATIC_ASSERT( a )                { static int static_assert_array__[ ( a ) ? 1 : -1 ]; }
-#define STATIC_ASSERT(cond) static_assert(cond, "Static assertion failed")
+#define STATIC_ASSERT( cond )            static_assert( cond, #cond )
 
 #define PI_FLOAT              ( 3.14159265f )
 #define PIBY2_FLOAT           ( 1.5707963f )

@@ -95,7 +95,6 @@ uint* UID1;
 bool FOClient::Init()
 {
     WriteLog( "Engine initialization...\n" );
-/*
     STATIC_ASSERT( sizeof( uint ) == 4 );
     STATIC_ASSERT( sizeof( ushort ) == 2 );
     STATIC_ASSERT( sizeof( uchar ) == 1 );
@@ -116,7 +115,6 @@ bool FOClient::Init()
     STATIC_ASSERT( sizeof( Sprite ) == 112 );
     STATIC_ASSERT( sizeof( ProtoMap::Tile ) == 12 );
     #endif
-*/
     GET_UID0( UID0 );
     UID_PREPARE_UID4_0;
 

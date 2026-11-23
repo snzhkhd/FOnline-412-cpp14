@@ -3379,7 +3379,6 @@ bool FOServer::InitReal()
        WriteLog("CScriptString<%u>.\n",sizeof(CScriptString));
        WriteLog("string<%u>.\n",sizeof(string));
      */
-/*
     // Check the sizes of struct and classes
     STATIC_ASSERT( sizeof( char ) == 1 );
     STATIC_ASSERT( sizeof( short ) == 2 );
@@ -3394,11 +3393,15 @@ bool FOServer::InitReal()
     #if defined ( FO_X86 )
     STATIC_ASSERT( sizeof( size_t ) == 4 );
     STATIC_ASSERT( sizeof( string ) == 24 );
-    // Note: Container sizes may vary depending on STL implementation
-    // Verify that containers have reasonable sizes
-    STATIC_ASSERT( sizeof( IntVec ) >= 12 && sizeof( IntVec ) <= 24 );
-    STATIC_ASSERT( sizeof( IntMap ) >= 16 && sizeof( IntMap ) <= 48 );
-    STATIC_ASSERT( sizeof( IntSet ) >= 16 && sizeof( IntSet ) <= 48 );
+    STATIC_ASSERT( sizeof( IntVec ) == 12 );
+    #if defined ( _MSVC_STL_VERSION ) && !defined ( _STLPORT_VERSION )
+    STATIC_ASSERT( _ITERATOR_DEBUG_LEVEL == 0 );
+    STATIC_ASSERT( sizeof( IntMap ) == 8 );
+    STATIC_ASSERT( sizeof( IntSet ) == 8 );
+    #else
+    STATIC_ASSERT( sizeof( IntMap ) == 24 );
+    STATIC_ASSERT( sizeof( IntSet ) == 24 );
+    #endif
     STATIC_ASSERT( sizeof( IntPair ) == 8 );
     STATIC_ASSERT( sizeof( ProtoItem ) == 908 );
     STATIC_ASSERT( sizeof( Item::ItemData ) == 120 );
@@ -3415,9 +3418,16 @@ bool FOServer::InitReal()
     STATIC_ASSERT( PROTO_ITEM_USER_DATA_SIZE == 500 );
     STATIC_ASSERT( OFFSETOF( Item, IsNotValid ) == 146 );
     STATIC_ASSERT( OFFSETOF( Critter::CrTimeEvent, Identifier ) == 12 );
+    #if defined ( _MSVC_STL_VERSION ) && !defined ( _STLPORT_VERSION )
+    // Engine layout with MSVC STL and iterator debugging disabled.
+    STATIC_ASSERT( OFFSETOF( Critter, RefCounter ) == 9492 );
+    STATIC_ASSERT( OFFSETOF( Client, LanguageMsg ) == 9652 );
+    STATIC_ASSERT( OFFSETOF( Npc, Reserved ) == 9512 );
+    #else
     STATIC_ASSERT( OFFSETOF( Critter, RefCounter ) == 9588 );
     STATIC_ASSERT( OFFSETOF( Client, LanguageMsg ) == 9748 );
     STATIC_ASSERT( OFFSETOF( Npc, Reserved ) == 9608 );
+    #endif
     STATIC_ASSERT( OFFSETOF( GameVar, RefCount ) == 22 );
     STATIC_ASSERT( OFFSETOF( TemplateVar, Flags ) == 68 );
     STATIC_ASSERT( OFFSETOF( AIDataPlane, RefCounter ) == 88 );
@@ -3431,7 +3441,6 @@ bool FOServer::InitReal()
     #else // FO_X64
     STATIC_ASSERT( sizeof( size_t ) == 8 );
     #endif
-*/
     // Critters parameters
     Critter::ParamsSendMsgLen = sizeof( Critter::ParamsSendCount );
     Critter::ParamsSendCount = 0;
